@@ -1,0 +1,54 @@
+# ===== 依赖与构建产物 =====
+node_modules/
+desktop/node_modules/
+desktop/cache/
+dist/
+build-out/
+final-app/
+ship-app/
+stage-app/
+pack-app/
+pack-app.asar
+verify-install/
+verify2/
+
+# ===== Android 工具链与构建中间物 =====
+android/tools/
+android/sdk/
+android/build/
+android/keystore.jks
+*.jks
+
+# ===== QA 与调试脚本 =====
+qa-apk/
+qa-walkthrough/
+desktop/_*.js
+desktop/diag*.js
+desktop/regress.js
+desktop/shot*.js
+_*.py
+_*.html
+_*.json
+
+# ===== 安装包（体积大，走 Releases）=====
+安装包/
+dist/*.exe
+*.exe
+*.apk
+*.idsig
+*.blockmap
+
+# ===== 系统与编辑器 =====
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# ===== 本地数据与密钥 =====
+*.local
+.env
+.env.*
+
+# ===== 临时/占位文件 =====
+assets/_*.js

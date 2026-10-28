@@ -1,0 +1,56 @@
+{
+  "name": "yumo-desktop",
+  "productName": "语墨",
+  "version": "1.0.0",
+  "description": "小学语文出题与批改台",
+  "main": "main.js",
+  "author": "语墨",
+  "license": "MIT",
+  "build": {
+    "appId": "com.yuwen.lab.desktop",
+    "productName": "语墨",
+    "directories": {
+      "output": "../dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "Yumo-${version}-Setup.${ext}",
+      "executableName": "Yumo",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "语墨",
+      "language": "2052",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
+    },
+    "extraMetadata": {
+      "main": "main.js"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^26.0.12"
+  }
+}
