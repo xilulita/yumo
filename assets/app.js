@@ -317,6 +317,52 @@ function bindMakeForm() {
   syncReadTypes();
 }
 
+/* 出题随机化：题材角度池，每次随机取不同方向，避免模型总走同一个套路 */
+const ANGLES_READ = [
+  '校园与课间生活', '家庭里的小事', '四季中的一次自然观察', '小动物或植物的成长',
+  '一次动手做的实验或手工', '一次小小的误会与和解', '家乡的风物与吃食', '雨天或雪天的一次经历',
+  '和小伙伴的合作', '一位熟悉的长辈', '旧物件背后的故事', '一次外出见闻',
+  '读书时的一个发现', '一场比赛或演出', '一朵花/一片叶子的观察日记'
+];
+const ANGLES_BASE = [
+  '同音字与形近字辨析', '动词与形容词的准确搭配', '常见量词与数量表达', '句子成分补全',
+  '把句子写具体', '关联词连接复句', '标点符号的使用场景', '病句的常见类型',
+  '多音字的语境读音', '近义词的细微差别', '成语的恰当使用', '比喻拟人句的辨别'
+];
+
+function pickAngle(pool, n) {
+  const a = pool.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n);
+}
+
+/* 最近出过的题材，喂给模型让它避开 */
+function recentAvoid(limit) {
+  return S.papers.slice(0, 8).map(x => x.title).filter(Boolean).slice(0, limit);
+}
+
+/* 判断新卷是否与最近某张卷高度相似：比较篇目标题 + 正文开头 */
+function similarToRecent(paper) {
+  const key = (paper.passages || []).map(p => (p.title || '') + (p.text || '').slice(0, 40)).join('|');
+  if (!key) return false;
+  const norm = (x) => x.replace(/\s+/g, '').toLowerCase();
+  const a = norm(key);
+  const hits = S.papers.slice(0, 8).filter(x => x.fingerprint).map(x => norm(x.fingerprint));
+  return hits.some(b => {
+    if (!b) return false;
+    if (a === b) return true;
+    // 简单包含判断：开头 40 字重合
+    return a.slice(0, 40) === b.slice(0, 40);
+  });
+}
+
+function makeSeed() {
+  return Date.now().toString(36).slice(-5).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+}
+
 function collectMakeOpts() {
   const grade = $('#grade').value;
   const gradeNum = { '一年级': 1, '二年级': 2, '三年级': 3, '四年级': 4, '五年级': 5, '六年级': 6 }[grade] || 3;
@@ -335,10 +381,18 @@ function collectMakeOpts() {
       genres,
       genre: genres.join('、'),
       words: [150, 220, 300, 380, 450, 520][gradeNum - 1],
-      types: ui.readTypes.slice()
+      types: ui.readTypes.slice(),
+      seed: makeSeed(),
+      angle: pickAngle(ANGLES_READ, Math.max(1, ui.passages)).join(' / '),
+      avoid: recentAvoid(6)
     });
   }
-  return Object.assign(base, { count: ui.basisCount });
+  return Object.assign(base, {
+    count: ui.basisCount,
+    seed: makeSeed(),
+    angle: pickAngle(ANGLES_BASE, 2).join(' / '),
+    avoid: recentAvoid(6)
+  });
 }
 
 async function generate() {
@@ -367,11 +421,28 @@ async function generate() {
 
   const t0 = performance.now();
   try {
-    const text = await callAI(S.cfg, [
-      { role: 'system', content: '你是中国小学语文教研员，只输出符合要求的 JSON。' },
-      { role: 'user', content: prompt }
-    ], { maxTokens: 6000 });
-    const data = parseJSONLoose(text);
+    // 生成并做重复检测：与近期卷高度相似时，换角度重试一次
+    let data = null;
+    let retried = false;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const usePrompt = attempt === 0 ? prompt : prompt +
+        `
+
+【重出】上一次生成的内容与近期练习重复，本次务必完全换一套素材：改用「${pickAngle(ANGLES_READ, 1)[0] || '新的生活场景'}」作为切入，人物、场景、情节全部重新设计。`;
+      const text = await callAI(S.cfg, [
+        { role: 'system', content: '你是中国小学语文教研员，只输出符合要求的 JSON。每次命题都要选全新的题材与素材，不得沿用常见课文或上一次的内容。' },
+        { role: 'user', content: usePrompt }
+      ], { maxTokens: 6000, temperature: attempt === 0 ? 0.95 : 1.1 });
+      const parsed = parseJSONLoose(text);
+      data = parsed;
+      const probe = {
+        passages: Array.isArray(parsed.passages) && parsed.passages.length
+          ? parsed.passages
+          : (parsed.passage ? [{ title: '', text: parsed.passage }] : [])
+      };
+      if (!isReading || !similarToRecent(probe)) break;
+      retried = true;
+    }
     const questions = Array.isArray(data.questions) ? data.questions : [];
     if (!questions.length) throw new Error('模型没有返回题目，请调整要求后重试。');
 
@@ -427,7 +498,11 @@ async function generate() {
       withAnswer: false,      // 默认导出/展示不带答案：先做题，答案在卷末
       dropped
     };
-    S.papers.unshift({ id: ui.lastPaper.id, time: ui.lastPaper.time, title: ui.lastPaper.title, grade: opts.grade, count: norm.length, mode: ui.mode });
+    S.papers.unshift({
+      id: ui.lastPaper.id, time: ui.lastPaper.time, title: ui.lastPaper.title,
+      grade: opts.grade, count: norm.length, mode: ui.mode,
+      fingerprint: passages.map(p => (p.title || '') + (p.text || '').slice(0, 40)).join('|')
+    });
     S.papers = S.papers.slice(0, 60);
     saveData();
     renderPaper(ui.lastPaper);
@@ -447,7 +522,7 @@ function errorCard(err, title) {
   return `<div class="card fadeup" style="border-left:3px solid var(--seal)">
     <div style="font-size:14px;font-weight:800;color:var(--seal-d);margin-bottom:6px">${esc(title)}</div>
     <div class="muted" style="font-size:12.5px;color:var(--ink-2);word-break:break-word">${esc(err.message)}</div>
-    <button class="btn ghost btn-sm" style="margin-top:10px" onclick="go('settings')">检查接口设置</button>
+    <button class="btn ghost btn-sm" style="margin-top:10px" data-act="go" data-arg="['settings']">检查接口设置</button>
   </div>`;
 }
 
@@ -481,6 +556,16 @@ function renderPreviewEmpty() {
     <h4>试卷将在这里生成</h4>
     <p>左侧设定年级、篇数与题型，点「生成试卷」后<br/>可直接预览、切换答案显示并导出</p>
   </div>`;
+}
+
+/* 分享能力：APK 内可用原生分享，能直接选微信 / 企业微信 */
+function canShare() {
+  const N = window.YW_API && window.YW_API.NATIVE;
+  return !!(N && typeof N.shareFile === 'function');
+}
+
+function shareLabel() {
+  return canShare() ? '分享到微信' : '分享';
 }
 
 function renderPaper(p) {
@@ -533,12 +618,16 @@ function renderPaper(p) {
           <div style="font-size:13.5px;font-weight:800">导出时附带答案</div>
           <div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">开启后答案单独排在卷末，不混在题里</div>
         </div>
-        <button class="switch ${withAnswer ? 'on' : ''}" id="answerSwitch" onclick="toggleAnswer()" aria-label="导出带答案"></button>
+        <button class="switch ${withAnswer ? 'on' : ''}" id="answerSwitch" data-act="toggle-answer" aria-label="导出带答案"></button>
       </div>
     </div>
     <div class="btn-row" style="margin-top:10px">
-      <button class="btn ghost" onclick="exportPaper()">导出 ${withAnswer ? '含答案' : '练习卷'}</button>
-      <button class="btn primary" onclick="go('grade')">去批改这份卷</button>
+      <button class="btn ghost" data-act="export-paper">导出 ${withAnswer ? '含答案' : '练习卷'}</button>
+      <button class="btn jade" data-act="share-paper">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg>
+        ${shareLabel()}
+      </button>
+      ${canShare() ? `<button class="btn ghost" data-act="share-wecom" title="直接发送到企业微信">企业微信</button>` : ''}
     </div>
   </div>`;
 }
@@ -551,10 +640,7 @@ function toggleAnswer() {
 }
 
 /* ---------- 导出：可含 / 不含答案 ---------- */
-function exportPaper() {
-  const p = ui.lastPaper;
-  if (!p) { toast('还没有生成试卷', true); return; }
-  const withAnswer = p.withAnswer !== false;
+function buildPaperHTML(p, withAnswer) {
   const passages = Array.isArray(p.passages) && p.passages.length
     ? p.passages
     : (p.passage ? [{ no: 1, genre: p.genre, title: '', text: p.passage }] : []);
@@ -628,15 +714,86 @@ function exportPaper() {
   ${answerHTML}
 </body></html>`;
 
+  return html;
+}
+
+function exportPaper() {
+  const p = ui.lastPaper;
+  if (!p) { toast('还没有生成试卷', true); return; }
+  const withAnswer = p.withAnswer !== false;
+  const html = buildPaperHTML(p, withAnswer);
   const name = `${p.title || '语文练习'}${withAnswer ? '-含答案' : '-练习卷'}.html`;
   download(name, html, 'text/html');
   toast(withAnswer ? '已导出：含答案版' : '已导出：纯练习卷');
 }
 
+/* ---------- 分享到微信 / 企业微信 ---------- */
+function base64FromText(text) {
+  const bytes = new TextEncoder().encode(text);
+  let bin = '';
+  const CH = 0x8000;
+  for (let i = 0; i < bytes.length; i += CH) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+  }
+  return btoa(bin);
+}
+
+/* 分享试卷：先生成 HTML，再交给原生分享面板 */
+function sharePaper(target) {
+  const p = ui.lastPaper;
+  if (!p) { toast('还没有生成试卷', true); return; }
+  const N = window.YW_API && window.YW_API.NATIVE;
+  if (!N || typeof N.shareFile !== 'function') {
+    toast('当前环境不支持分享，请用导出后再发送', true);
+    return;
+  }
+  const withAnswer = p.withAnswer !== false;
+  const html = buildPaperHTML(p, withAnswer);   // 与导出同一套渲染
+  const name = `${p.title || '语文练习'}${withAnswer ? '-含答案' : '-练习卷'}.html`;
+  try {
+    const b64 = base64FromText(html);
+    if (target && typeof N.shareToApp === 'function') {
+      N.shareToApp(name, 'text/html', b64, target);
+    } else {
+      N.shareFile(name, 'text/html', b64);
+    }
+    toast(target ? '正在打开分享…' : '选择要分享到的应用');
+  } catch (e) {
+    toast('分享失败：' + e.message, true);
+  }
+}
+
+/* 直达企业微信 */
+function shareWeCom() {
+  sharePaper('com.tencent.wework');
+}
+
+window.YW.onShareResult = function (ok, msg) {
+  if (!ok) toast(msg || '分享未完成', true);
+};
+
 /* 下载/保存：APK 内走系统文件选择器，浏览器内走 <a download> */
 function download(name, content, type) {
   const safeName = name.replace(/[\\/:*?"<>|]/g, '_');
   const mime = (type || 'application/json').replace(';charset=utf-8', '');
+
+  // 桌面版：走 Electron 的系统「另存为」对话框
+  const D = window.YWDesktop;
+  if (D && typeof D.saveFile === 'function') {
+    D.saveFile(safeName, content, mime).then((r) => {
+      if (r && r.ok) {
+        toast('已保存到 ' + (r.path || safeName));
+      } else if (r && r.cancelled) {
+        // 用户取消，不提示
+      } else {
+        toast('保存失败：' + ((r && r.error) || '未知错误'), true);
+      }
+    }).catch((e) => {
+      toast('保存失败：' + e.message, true);
+    });
+    return;
+  }
+
   const N = window.YW_API.NATIVE;
   if (N) {
     try {
@@ -672,7 +829,7 @@ window.YW.onSaveResult = function (ok, msg) {
 /* ---- 暴露给后续模块 ---- */
 window.setMode = setMode; window.exportPaper = exportPaper;
 Object.assign(YW, {
-  $, $$, esc, toast, go, syncApiState, fillStudentSelect, exportPaper, setMode, bindMakeForm, iconCheck, renderPaper, toggleAnswer, generate, renderHome, syncApiState, saveCfg,
+  $, $$, esc, toast, go, syncApiState, fillStudentSelect, exportPaper, setMode, bindMakeForm, iconCheck, renderPaper, toggleAnswer, sharePaper, shareWeCom, buildPaperHTML, canShare, generate, renderHome, syncApiState, saveCfg,
   num, str, clamp, uid, nowStr, avatarHTML, download, errorCard, hasKey, findRec, loadState, saveData,
   getS: () => S, getUi: () => ui, saveData
 });

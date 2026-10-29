@@ -1,0 +1,9 @@
+{
+  "name": "yumo-desktop",
+  "productName": "语墨",
+  "version": "1.0.2",
+  "description": "小学语文出题与批改台",
+  "main": "main.js",
+  "author": "语墨",
+  "license": "MIT"
+}

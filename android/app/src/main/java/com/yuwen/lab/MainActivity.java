@@ -3,6 +3,7 @@ package com.yuwen.lab;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.content.Intent;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.print.PrintAttributes;
@@ -23,6 +24,8 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -308,6 +311,114 @@ public class MainActivity extends Activity {
                         i.putExtra(Intent.EXTRA_TEXT, text);
                         startActivity(Intent.createChooser(i, "分享"));
                     } catch (Exception ignored) {
+                    }
+                }
+            });
+        }
+
+        /**
+         * 分享文件到微信 / 企业微信等应用：
+         * 写入应用缓存目录，经 FileProvider 授权后调起系统分享面板
+         */
+        @JavascriptInterface
+        public void shareFile(final String fileName, final String mime, final String base64) {
+            final String type = (mime == null || mime.length() == 0)
+                    ? "application/octet-stream" : mime;
+            io.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        byte[] data = Base64.decode(base64, Base64.DEFAULT);
+                        File dir = new File(getCacheDir(), "share");
+                        if (!dir.exists()) dir.mkdirs();
+                        // 每次用新的子目录，避免同名覆盖导致 FileProvider 报错
+                        File sub = new File(dir, String.valueOf(System.currentTimeMillis()));
+                        sub.mkdirs();
+                        final File f = new File(sub, fileName);
+                        FileOutputStream fos = new FileOutputStream(f);
+                        try { fos.write(data); } finally { fos.close(); }
+
+                        final Uri uri = Uri.parse("content://" + getPackageName()
+                                + ShareProvider.AUTHORITY_SUFFIX + "/share/"
+                                + sub.getName() + "/" + f.getName());
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Intent i = new Intent(Intent.ACTION_SEND);
+                                    i.setType(type);
+                                    i.putExtra(Intent.EXTRA_STREAM, uri);
+                                    i.putExtra(Intent.EXTRA_TITLE, fileName);
+                                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    Intent chooser = Intent.createChooser(i, "分享到");
+                                    startActivity(chooser);
+                                    js("YW.onShareResult && YW.onShareResult(true)");
+                                } catch (Exception e) {
+                                    String m = e.getMessage() == null ? "无法调起分享" : e.getMessage().replace("'", " ");
+                                    js("YW.onShareResult && YW.onShareResult(false, '" + m + "')");
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        String m = e.getMessage() == null ? "分享失败" : e.getMessage().replace("'", " ");
+                        js("YW.onShareResult && YW.onShareResult(false, '" + m + "')");
+                    }
+                }
+            });
+        }
+
+        /** 直接调起微信好友分享（若已安装） */
+        @JavascriptInterface
+        public void shareToApp(final String fileName, final String mime, final String base64, final String pkg) {
+            final String type = (mime == null || mime.length() == 0)
+                    ? "application/octet-stream" : mime;
+            io.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        byte[] data = Base64.decode(base64, Base64.DEFAULT);
+                        File dir = new File(getCacheDir(), "share");
+                        if (!dir.exists()) dir.mkdirs();
+                        File sub = new File(dir, String.valueOf(System.currentTimeMillis()));
+                        sub.mkdirs();
+                        final File f = new File(sub, fileName);
+                        FileOutputStream fos = new FileOutputStream(f);
+                        try { fos.write(data); } finally { fos.close(); }
+
+                        final Uri uri = Uri.parse("content://" + getPackageName()
+                                + ShareProvider.AUTHORITY_SUFFIX + "/share/"
+                                + sub.getName() + "/" + f.getName());
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Intent i = new Intent(Intent.ACTION_SEND);
+                                    i.setType(type);
+                                    i.setPackage(pkg);
+                                    i.putExtra(Intent.EXTRA_STREAM, uri);
+                                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    startActivity(i);
+                                    js("YW.onShareResult && YW.onShareResult(true)");
+                                } catch (Exception e) {
+                                    // 未安装该应用时，回退到系统分享面板
+                                    try {
+                                        Intent i = new Intent(Intent.ACTION_SEND);
+                                        i.setType(type);
+                                        i.putExtra(Intent.EXTRA_STREAM, uri);
+                                        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                        startActivity(Intent.createChooser(i, "分享到"));
+                                        js("YW.onShareResult && YW.onShareResult(true)");
+                                    } catch (Exception e2) {
+                                        js("YW.onShareResult && YW.onShareResult(false, '未安装该应用，也无法调起分享')");
+                                    }
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        String m = e.getMessage() == null ? "分享失败" : e.getMessage().replace("'", " ");
+                        js("YW.onShareResult && YW.onShareResult(false, '" + m + "')");
                     }
                 }
             });

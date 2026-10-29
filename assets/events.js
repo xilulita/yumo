@@ -10,6 +10,8 @@
     'mode': 'setMode',
     'gen': 'generate',
     'export-paper': 'exportPaper',
+    'share-paper': 'sharePaper',
+    'share-wecom': 'shareWeCom',
     'toggle-answer': 'toggleAnswer',
     'pick-image': 'pickImage',
     'toggle-paste': 'toggleTextPaste',
@@ -31,7 +33,9 @@
     'export-data': 'exportData',
     'toggle-guard': 'toggleGuard',
     'print': 'printPage',
-    'fill': 'fillSettings'
+    'fill': 'fillSettings',
+    'open-report': 'renderGrade',
+    'export-stu-practice-enc': 'exportStuPractice'
   };
 
   /* 特殊动作 */
@@ -48,6 +52,24 @@
     }
     if (act === '__toggle-self') {
       el.classList.toggle('on');
+      return true;
+    }
+    // 打开某条批改记录的报告（找不到时用 data-rec 备份）
+    if (act === 'open-report') {
+      const id = (el.dataset.arg || '').replace(/[\[\]"']/g, '');
+      let rec = null;
+      if (window.findRec) rec = window.findRec(id);
+      if (!rec && el.dataset.rec) {
+        try { rec = JSON.parse(el.dataset.rec); } catch (e) { rec = null; }
+      }
+      if (rec && window.renderGrade) window.renderGrade(rec);
+      return true;
+    }
+    // 导出专项卷（数据在 data-enc 里，避免超长参数）
+    if (act === 'export-stu-practice-enc') {
+      const id = (el.dataset.arg || '').replace(/[\[\]"']/g, '');
+      const enc = el.dataset.enc || '';
+      if (window.exportStuPractice) window.exportStuPractice(id, enc);
       return true;
     }
     return false;

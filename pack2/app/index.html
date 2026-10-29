@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>语墨 · 小学语文出题与批改台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23BE4E34'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23FFF6EC' font-family='serif'%3E%E5%A2%A8%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="assets/styles.css?v=29" />
+<link rel="stylesheet" href="assets/desk.css?v=1" />
+</head>
+<body>
+<div class="desk">
+
+  <!-- ============ 左侧导航 ============ -->
+  <aside class="rail">
+    <div class="rail-brand">
+      <div class="rail-seal">墨</div>
+      <div>
+        <div class="rail-name">语墨</div>
+        <div class="rail-sub">小学语文 · 出题与批改</div>
+      </div>
+    </div>
+
+    <nav class="rail-nav">
+      <div class="rail-sec">工作台</div>
+          <button class="rail-item on" data-tab="home" data-act="go" data-arg="['home']">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 01-1 1h-5v-6H10v6H5a1 1 0 01-1-1z"/></svg>
+            <span>总览</span>
+          </button>
+          <button class="rail-item" data-tab="make" data-act="go" data-arg="['make']">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="3"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/></svg>
+            <span>出题</span>
+          </button>
+          <button class="rail-item" data-tab="grade" data-act="go" data-arg="['grade']">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><path d="M9 13.6l2.2 2.2 4.4-4.6"/></svg>
+            <span>批改</span>
+          </button>
+          <button class="rail-item" data-tab="students" data-act="go" data-arg="['students']">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><path d="M16 6.2a3 3 0 010 5.6M17.8 19c-.2-2.2-1-3.8-2.3-4.6"/></svg>
+            <span>学生</span>
+          </button>
+          <button class="rail-item" data-tab="settings" data-act="go" data-arg="['settings']">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9 2 2 0 11-2.8 2.8 1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-2.9-1.2 2 2 0 11-2.8-2.8A1.7 1.7 0 003.4 14H3a2 2 0 110-4h.1a1.7 1.7 0 001.2-2.9 2 2 0 112.8-2.8A1.7 1.7 0 0010 3.1V3a2 2 0 114 0v.1a1.7 1.7 0 002.9 1.2 2 2 0 112.8 2.8A1.7 1.7 0 0021 10h0a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+            <span>设置</span>
+          </button>
+    </nav>
+
+    <div class="rail-foot">
+      <div class="rail-tip"><b>快捷操作</b>Ctrl+N 新建试卷<br/>Ctrl+O 批改作业<br/>Ctrl+S 导出备份</div>
+      <button class="api-mini" data-act="go" data-arg="['settings']">
+        <span class="led no" id="sideLed"></span>
+        <span id="sideApiTxt">接口未配置</span>
+      </button>
+      <div class="rail-ver">语墨 1.0.0</div>
+    </div>
+  </aside>
+
+  <!-- ============ 主区 ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="crumb">
+        <span>工作台</span><span class="sp">/</span>
+        <b id="topTitle">总览</b>
+      </div>
+      <div class="fill"></div>
+      <button class="tb-btn" data-act="go" data-arg="['students']">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><path d="M16 6.2a3 3 0 010 5.6M17.8 19c-.2-2.2-1-3.8-2.3-4.6"/></svg>
+        学生档案
+      </button>
+      <button class="tb-btn primary" data-act="go" data-arg="['make']">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        新建试卷
+      </button>
+    </header>
+
+    <main class="body" id="body">
+      <section class="page on" id="page-home">
+          <div class="dash">
+            <div class="dash-hero">
+              <span class="eyebrow"><i></i><span id="heroLive">接口未配置 · 设置后可生成</span></span>
+              <h2>因材命题<br/>逐字见心</h2>
+              <p>按年级与文体配制阅读卷，也能把学生交上来的手写作业读成一份学情报告。</p>
+              <div class="btn-row">
+                <button class="btn primary" data-act="go" data-arg="['make']">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  开始出题
+                </button>
+                <button class="btn" data-act="go" data-arg="['grade']">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg>
+                  批改作业
+                </button>
+              </div>
+              <svg class="art" viewBox="0 0 160 160" fill="none">
+                <ellipse cx="84" cy="126" rx="56" ry="9" fill="#B98A33" opacity=".10"/>
+                <rect x="38" y="30" width="84" height="72" rx="8" fill="#FFFCEE" stroke="#E0D3B4" stroke-width="1.2" transform="rotate(-6 38 30)"/>
+                <path d="M52 50l56-6M54 64l50-5M56 78l38-4" stroke="#DCCBAA" stroke-width="3" stroke-linecap="round"/>
+                <path d="M100 98l5-14 5 14z" fill="#BE4E34"/>
+                <rect x="98" y="94" width="6" height="6" rx="1.5" fill="#BE4E34"/>
+                <rect x="120" y="62" width="14" height="48" rx="4" fill="#EADFC7" transform="rotate(14 120 62)"/>
+                <path d="M127 106l5 2-2 8-5-3z" fill="#3B7A62"/>
+              </svg>
+            </div>
+
+            <div class="stat-panel">
+              <div class="stat-row">
+                <div class="stat red"><b id="stQ">0</b><span>累计出题</span></div>
+                <div class="stat green"><b id="stG">0</b><span>已批作业</span></div>
+                <div class="stat gold"><b id="stS">0</b><span>在册学生</span></div>
+              </div>
+              <div class="entry-panel">
+                <button class="entry" data-act="go" data-arg="['make']" data-mode="reading">
+                  <span class="ei"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 5.5c2.6-1 5.2-.6 8 1v13c-2.8-1.6-5.4-2-8-1z"/><path d="M20 5.5c-2.6-1-5.2-.6-8 1v13c2.8-1.6 5.4-2 8-1z"/></svg></span>
+                  <div><div class="et">阅读理解命题</div><div class="ed">课内延伸 / 1–3 篇 / 每篇 2–4 题</div></div>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+                </button>
+                <button class="entry jade" data-act="go" data-arg="['make']" data-mode="basis">
+                  <span class="ei"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M7.5 9h9M7.5 12.5h6M7.5 16h4"/></svg></span>
+                  <div><div class="et">基础训练命题</div><div class="ed">字词句段 / 5–10 题 / 分层配比</div></div>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+                </button>
+                <button class="entry seal" data-act="go" data-arg="['grade']">
+                  <span class="ei"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg></span>
+                  <div><div class="et">图文批改</div><div class="ed">拍照上传 / 逐题诊断 / 生成加练</div></div>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+                </button>
+                <button class="entry indigo" data-act="go" data-arg="['students']">
+                  <span class="ei"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><path d="M16 6.2a3 3 0 010 5.6M17.8 19c-.2-2.2-1-3.8-2.3-4.6"/></svg></span>
+                  <div><div class="et">学情档案</div><div class="ed">错题沉淀 / 专项加练 / 成绩走势</div></div>
+                  <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec" id="homeRecentSec">
+            <div class="sec-hd"><h3>最近批改</h3><button class="more" data-act="go" data-arg="['students']">查看全部 ›</button></div>
+            <div class="card" style="padding:8px 12px" id="homeRecent"></div>
+          </div>
+        
+        
+      </section>
+
+      <section class="page" id="page-make">
+          <div class="make-grid">
+            <div class="make-form">
+              <div class="card">
+                <div class="h2" style="margin-bottom:14px">命题设置</div>
+<div class="seg" id="modeSeg">
+              <button class="on" data-mode="reading">阅读理解</button>
+              <button data-mode="basis">基础训练</button>
+            </div>
+
+            <div style="margin-top:16px" class="row2">
+              <label class="field"><span class="lb">年级</span>
+                <select class="sel" id="grade">
+                  <option>一年级</option><option>二年级</option><option selected>三年级</option>
+                  <option>四年级</option><option>五年级</option><option>六年级</option>
+                </select>
+              </label>
+              <label class="field" style="margin-bottom:0"><span class="lb">难度</span>
+                <select class="sel" id="diff">
+                  <option value="基础">基础</option>
+                  <option value="适中" selected>适中</option>
+                  <option value="提升">提升</option>
+                </select>
+              </label>
+            </div>
+
+            <!-- 阅读理解 -->
+            <div id="readingOpts">
+              <div class="field"><span class="lb">阅读篇数</span>
+                <div class="seg seg-count" id="passageSeg">
+                  <button data-n="1" class="on">1 篇</button>
+                  <button data-n="2">2 篇</button>
+                  <button data-n="3">3 篇</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <span class="lb">文体 / 选文方向 <span class="lb-hint" id="genreHint">1 篇只能选 1 种文体</span></span>
+                <div class="chips" id="genreChips">
+                  <button class="chip on" data-v="写人记事">写人记事</button>
+                  <button class="chip" data-v="写景状物">写景状物</button>
+                  <button class="chip" data-v="童话寓言">童话寓言</button>
+                  <button class="chip" data-v="科普说明">科普说明</button>
+                  <button class="chip" data-v="古诗文">古诗文</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <span class="lb">阅读题型</span>
+                <div class="builder-grid" id="readTypeGrid">
+                  <button class="pick on" data-t="填空题">填空题<i class="tick"></i></button>
+                  <button class="pick on" data-t="简答题">简答题<i class="tick"></i></button>
+                  <button class="pick" data-t="选择题">选择题<i class="tick"></i></button>
+                  <button class="pick" data-t="判断题">判断题<i class="tick"></i></button>
+                </div>
+                <div class="notice" id="readTypeNotice">默认不出选择题，阅读题以填空、简答为主。</div>
+              </div>
+
+              <div class="field" style="margin-bottom:0"><span class="lb">每篇题量</span>
+                <div class="seg seg-count" id="countSeg">
+                  <button data-c="2">2 题</button>
+                  <button data-c="3" class="on">3 题</button>
+                  <button data-c="4">4 题</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 基础训练 -->
+            <div id="basisOpts" style="display:none">
+              <div class="field" style="margin-bottom:10px"><span class="lb">题型配比（可多选）</span>
+                <div class="builder-grid" id="basisGrid">
+                  <button class="pick on" data-t="看拼音写词语">看拼音写词语<i class="tick"></i></button>
+                  <button class="pick on" data-t="多音字辨析">多音字辨析<i class="tick"></i></button>
+                  <button class="pick on" data-t="词语搭配">词语搭配<i class="tick"></i></button>
+                  <button class="pick on" data-t="近反义词">近反义词<i class="tick"></i></button>
+                  <button class="pick" data-t="句式变换">句式变换<i class="tick"></i></button>
+                  <button class="pick" data-t="修改病句">修改病句<i class="tick"></i></button>
+                  <button class="pick" data-t="标点符号">标点符号<i class="tick"></i></button>
+                  <button class="pick" data-t="关联词填空">关联词填空<i class="tick"></i></button>
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:0"><span class="lb">题量</span>
+                <div class="seg seg-count" id="basisCountSeg">
+                  <button data-c="5">5 题</button>
+                  <button data-c="7" class="on">7 题</button>
+                  <button data-c="10">10 题</button>
+                </div>
+              </div>
+            </div>
+
+            <label class="field" style="margin-top:16px"><span class="lb" id="focusLb">想考查的能力（选填）</span>
+              <textarea class="ta" id="focus" placeholder="例如：概括段落大意；体会人物心情的变化；上下文推断词义…"></textarea>
+            </label>
+
+            <label class="field" style="margin-bottom:0"><span class="lb">教材单元 / 课文（选填）</span>
+              <div style="display:flex;gap:9px">
+                <input class="inp" id="unit" placeholder="如：三上 第四单元《秋天的雨》" />
+              </div>
+            </label>
+              </div>
+              <div class="btn-row" style="margin-top:14px;justify-content:flex-end">
+
+            <button class="btn ghost" data-act="go" data-arg="['settings']">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.5 13.5l-1 4.5 3.5-2.5"/><path d="M4 20l5.5-1.5L20.5 7.5a2.1 2.1 0 00-3-3L6.5 15.5z"/></svg>
+              接口
+            </button>
+            <button class="btn primary" id="genBtn" data-act="gen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+              生成试卷
+            </button>
+              </div>
+            </div>
+
+            <div class="make-preview">
+              <div class="sec-hd"><h3>试卷预览</h3><span class="muted" id="previewMeta"></span></div>
+              <div id="genOut"></div>
+            </div>
+          </div>
+        
+      </section>
+
+      <section class="page" id="page-grade">
+          <div class="grade-grid">
+            <div>
+              <div class="sec-hd"><h3>交作业</h3><span class="muted">支持图片、拖拽、粘贴</span></div>
+<div class="uploader" id="uploader">
+            <img id="upPreview" alt="" style="display:none" />
+            <span class="ovl" id="upOvl" style="display:none"></span>
+            <div id="upEmpty" style="display:flex;flex-direction:column;align-items:center;gap:9px">
+              <div class="up-ico">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.4"/></svg>
+              </div>
+              <div class="up-t">拍下这一页作业</div>
+              <div class="up-d">拍一张学生交来的练习<br/>也可以直接粘贴作答文字</div>
+            </div>
+            <div class="up-actions">
+              <button class="cam-btn" data-act="pick-image">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg>
+                选择图片
+              </button>
+              <button class="btn btn-sm" data-act="toggle-paste" style="background:rgba(255,253,248,.92);box-shadow:var(--shadow-out-sm)">粘贴文字</button>
+            </div>
+            <div class="filename" id="upFile" style="display:none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+              <span id="upName"></span>
+              <button data-act="clear-image">重选</button>
+            </div>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" style="display:none" />
+          <div class="hintline">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg>
+            <span>图片将随本次请求发送至你配置的多模态模型，不做本地留存。</span>
+          </div>
+
+          <div id="textPaste" style="display:none;margin-top:12px">
+            <label class="field" style="margin-bottom:0"><span class="lb">学生作答原文</span>
+              <textarea class="ta" id="answerText" style="min-height:120px" placeholder="把题目与答案贴进来，例如：&#10;1. 文章第②段中“…”一词指什么？&#10;答：……"></textarea>
+            </label>
+          </div>
+            </div>
+
+            <div>
+              <div class="sec-hd"><h3>归属与提交</h3></div>
+<div class="card" style="margin-top:14px">
+            <div class="field" style="margin-bottom:10px"><span class="lb">归属学生</span>
+              <select class="sel" id="gradeStudent"></select>
+            </div>
+            <div class="field" style="margin-bottom:0"><span class="lb">这份作业来自</span>
+              <div class="seg" id="srcSeg">
+                <button class="on" data-s="out">我出的卷</button>
+                <button data-s="ext">课外/其他作业</button>
+              </div>
+            </div>
+          </div>
+              <div style="margin-top:14px" class="btn-row" style="justify-content:flex-end">
+                <button class="btn primary wide" style="margin-top:14px" id="gradeBtn" data-act="run-grade">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+            开始批改并生成学情
+          </button>
+              </div>
+              <div id="gradeOut" style="margin-top:18px"></div>
+
+              <div class="card" style="margin-top:16px">
+                <div class="sec-hd" style="margin-bottom:10px"><h3 style="font-size:13.5px">批改会产出什么</h3></div>
+                <div class="grade-feat">
+                  <div class="gf"><b>逐题定位</b><span>哪一题错、错在哪一层，写出订正提示</span></div>
+                  <div class="gf"><b>能力画像</b><span>字词、检索、概括等维度给出得分率</span></div>
+                  <div class="gf"><b>配套加练</b><span>针对薄弱点自动生成专项题，可单独导出</span></div>
+                  <div class="gf"><b>归档</b><span>结果进入学生档案，错题自动累积</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+      </section>
+
+      <section class="page" id="page-report">
+
+          <div style="display:flex;align-items:center;gap:10px;margin:2px 0 14px">
+            <button class="btn ghost btn-sm" data-act="go" data-arg="['grade']" style="min-height:34px;padding:6px 12px 6px 9px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+              返回
+            </button>
+            <span style="font-size:12px;color:var(--ink-3);letter-spacing:1px">学情报告</span>
+          </div>
+          <div id="reportBody"></div>
+        
+      </section>
+
+      <section class="page" id="page-students">
+          <div class="sec-hd">
+            <h3>在册学生</h3>
+            <button class="more" data-act="add-student">＋ 新增学生</button>
+          </div>
+          <div class="stu-grid" id="stuGrid"></div>
+          <div class="empty" id="stuEmpty" style="display:none">还没有学生，点右上角新增一位。</div>
+          <div id="stuDetail" style="margin-top:22px"></div>
+        
+      </section>
+
+      <section class="page" id="page-settings">
+          <div class="set-grid">
+            <div>
+              <div class="sec-hd"><h3>AI 接口</h3></div>
+              <div class="card">
+            <div class="h2" style="font-size:17px">AI 接口</div>
+            <p class="muted" style="margin:2px 0 14px">出题与批改都走你自己配置的接口，密钥只保存在本机浏览器。</p>
+
+            <label class="field"><span class="lb">服务商预设</span>
+              <select class="sel" id="provider">
+                <option value="dashscope">阿里云百炼 / 通义千问（qwen-vl 支持读图）</option>
+                <option value="openai">OpenAI</option>
+                <option value="moonshot">月之暗面 Kimi</option>
+                <option value="zhipu">智谱 GLM</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="custom">自定义 OpenAI 兼容接口</option>
+              </select>
+            </label>
+            <label class="field"><span class="lb">Base URL</span>
+              <input class="inp" id="baseUrl" placeholder="https://dashscope.aliyuncs.com/compatible-mode/v1" />
+            </label>
+            <label class="field"><span class="lb">模型名</span>
+              <input class="inp" id="model" placeholder="qwen-vl-max" />
+            </label>
+            <label class="field"><span class="lb">API Key</span>
+              <input class="inp" id="apiKey" type="password" placeholder="sk-..." autocomplete="off" />
+            </label>
+            <div class="row2">
+              <label class="field" style="margin-bottom:0"><span class="lb">温度</span><input class="inp" id="temp" value="0.6" /></label>
+              <label class="field" style="margin-bottom:0"><span class="lb">超时（秒）</span><input class="inp" id="timeout" value="90" /></label>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn ghost" data-act="clear-key">清除密钥</button>
+            <button class="btn jade" data-act="save-config" data-arg="[true]">保存并测试</button>
+          </div>
+          <div class="card" style="margin-top:14px;padding:6px 14px">
+            <div class="set-row">
+              <div class="si"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
+              <div class="sx"><b>连接状态</b><span id="cfgState">未配置</span></div>
+              <span class="key-state no" id="cfgBadge">未连接</span>
+            </div>
+            <div class="set-row">
+              <div class="si"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v18M5 7h14M7 7l-3 7h6zM17 7l-3 7h6z"/></svg></div>
+              <div class="sx"><b>只出题，不批改</b><span>关闭后批改按钮会阻止提交并提示先配置接口</span></div>
+              <button class="switch" id="guardSwitch" data-act="toggle-guard" aria-label="校验开关"></button>
+            </div>
+            <div class="set-row">
+              <div class="si"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h13"/></svg></div>
+              <div class="sx"><b>称呼学生为「小作者」</b><span>批语与报告中的称呼统一切换</span></div>
+              <button class="switch on" data-act="__toggle-self" aria-label="称呼开关"></button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px">
+            <div class="sec-hd" style="margin-bottom:6px"><h3 style="font-size:14.5px">本地数据</h3></div>
+            <p class="muted" style="font-size:12px;margin:0 0 12px">学生档案、错题与生成的试卷保存在本机。换设备请先导出备份。</p>
+            <div class="btn-row" style="margin-top:0">
+              <button class="btn ghost btn-sm" data-act="export-data">导出备份</button>
+              <button class="btn ghost btn-sm" data-act="__click" data-arg="['impFile']">导入备份</button>
+            </div>
+            <input type="file" id="impFile" accept="application/json" style="display:none" />
+          </div>
+
+          <div class="card" style="margin-top:14px">
+            <div class="sec-hd" style="margin-bottom:6px"><h3 style="font-size:14.5px">快捷操作</h3></div>
+            <button class="btn ghost btn-sm wide" data-act="clear-key" style="margin-bottom:9px">清除已保存的 API 密钥</button>
+            <button class="btn ghost btn-sm wide" data-act="reset-demo">重置为初始数据</button>
+          </div>
+            </div>
+            <div>
+              <div class="sec-hd"><h3>本地数据</h3></div>
+              <div class="card">
+                <div class="set-row">
+                  <div class="si"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg></div>
+                  <div class="sx"><b>导出备份</b><span>把学生、错题与试卷存成 JSON，建议每周一次</span></div>
+                  <button class="btn btn-sm" data-act="export-data">导出</button>
+                </div>
+                <div class="set-row">
+                  <div class="si"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 21V9m0 0L8 13m4-4l4 4M4 7V4h16v3"/></svg></div>
+                  <div class="sx"><b>导入备份</b><span>覆盖当前数据，换电脑时使用</span></div>
+                  <button class="btn btn-sm" data-act="__click" data-arg="['impFile']">选择文件</button>
+                </div>
+                <div class="set-row">
+                  <div class="si"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></div>
+                  <div class="sx"><b>清空密钥</b><span>仅删除本机保存的 API Key</span></div>
+                  <button class="btn btn-sm" data-act="clear-key">清除</button>
+                </div>
+                <div class="set-row">
+                  <div class="si"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12a8 8 0 1 1 2.3 5.6"/><path d="M4 20v-5h5"/></svg></div>
+                  <div class="sx"><b>恢复初始数据</b><span>清空所有学生、错题与记录</span></div>
+                  <button class="btn btn-sm" data-act="reset-demo">重置</button>
+                </div>
+                <input type="file" id="impFile" accept="application/json" style="display:none" />
+              </div>
+
+              <div class="sec-hd" style="margin-top:20px"><h3>关于</h3></div>
+              <div class="card">
+                <p class="muted" style="margin:0 0 10px">语墨 · 小学语文出题与批改台 <b style="color:var(--ink-2)" id="appVer"></b></p>
+                <p class="muted" style="margin:0">所有学生数据与接口密钥仅保存在本机，不会上传到任何第三方。导出试卷与备份通过系统「另存为」对话框保存。</p>
+              </div>
+            </div>
+          </div>
+        
+      </section>
+
+    </main>
+
+    <div class="toast-wrap"><div class="toast" id="toast"></div></div>
+  </div>
+</div>
+
+<div class="modal-mask" id="modal" data-act="__self-close">
+  <div class="sheet" id="sheet">
+    <h3 id="sheetTitle">新增学生</h3>
+    <p class="sh-sub" id="sheetSub">学生档案用于归档错题与生成专项练习。</p>
+    <label class="field"><span class="lb">姓名</span><input class="inp" id="mName" placeholder="如：林小禾" /></label>
+    <div class="row2">
+      <label class="field"><span class="lb">班级</span><input class="inp" id="mClass" placeholder="三（2）班" /></label>
+      <label class="field"><span class="lb">座位号</span><input class="inp" id="mNo" placeholder="选填" /></label>
+    </div>
+    <label class="field"><span class="lb">备注</span><input class="inp" id="mNote" placeholder="如：阅读速度偏慢，书写工整" /></label>
+    <div class="btn-row" style="justify-content:flex-end">
+      <button class="btn ghost" data-act="close-modal">取消</button>
+      <button class="btn primary" data-act="save-student">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/config.js?v=30"></script>
+<script src="assets/app.js?v=30"></script>
+<script src="assets/grade.js?v=30"></script>
+<script src="assets/students.js?v=30"></script>
+<script src="assets/mobile.js?v=30"></script>
+<script src="assets/events.js?v=2"></script>
+<script src="assets/desktop.js?v=3"></script>
+</body>
+</html>

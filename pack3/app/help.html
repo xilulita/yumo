@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>语墨 · 安装与使用说明</title>
+<style>
+  :root{--paper:#F4EFE5;--card:#FFFDF8;--ink:#2B2A28;--ink2:#5B564F;--ink3:#8C857A;--seal:#C8553D;--line:#E7DFCF}
+  *{box-sizing:border-box}
+  body{margin:0;padding:30px 34px 44px;font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+       color:var(--ink);background:var(--paper);font-size:14px;line-height:1.85;
+       background-image:radial-gradient(rgba(140,120,90,.05) 1px,transparent 1.4px);background-size:4px 4px}
+  h1{font-family:"Songti SC","SimSun",serif;font-size:22px;letter-spacing:2px;margin:0 0 4px}
+  .sub{color:var(--ink3);font-size:12px;letter-spacing:1px;margin-bottom:22px}
+  h2{font-size:15px;margin:24px 0 8px;padding-left:10px;border-left:3px solid var(--seal);letter-spacing:.5px}
+  p{margin:6px 0;color:var(--ink2)}
+  ol,ul{margin:6px 0;padding-left:22px;color:var(--ink2)}
+  li{margin:5px 0}
+  code{background:#F1EADA;border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:Consolas,monospace}
+  .box{background:var(--card);border-radius:14px;padding:14px 16px;margin:10px 0;
+       box-shadow:4px 4px 10px rgba(120,100,70,.10),-3px -3px 8px rgba(255,255,255,.9)}
+  .k{display:inline-block;min-width:20px;text-align:center;background:#F3ECDD;border-radius:5px;
+     padding:0 6px;font-size:12px;font-family:Consolas,monospace;color:var(--ink)}
+  .tip{background:#FCF7EA;border:1px dashed #DCCDB0;border-radius:10px;padding:10px 12px;font-size:13px;color:#7A6A4E;margin:10px 0}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--ink3);font-weight:600;font-size:12px}
+</style>
+</head>
+<body>
+  <h1>语墨 · 安装与使用说明</h1>
+  <div class="sub">DESKTOP EDITION · 本地运行，数据不出电脑</div>
+
+  <h2>第一次使用</h2>
+  <ol>
+    <li>打开程序，点右下「设置」。</li>
+    <li>选服务商预设，填写 <code>API Key</code>，点「保存并测试」。</li>
+    <li>看到「连通正常」即可出题；做图片批改需选支持读图的模型（如 <code>qwen-vl-max</code>、<code>gpt-4o</code>）。</li>
+  </ol>
+  <div class="tip">密钥只保存在本机配置文件里，不会上传到任何地方。导出的备份文件不含密钥。</div>
+
+  <h2>常用快捷键</h2>
+  <table>
+    <tr><th>快捷键</th><th>作用</th></tr>
+    <tr><td><span class="k">Ctrl</span>+<span class="k">N</span></td><td>新建试卷</td></tr>
+    <tr><td><span class="k">Ctrl</span>+<span class="k">O</span></td><td>跳到批改页</td></tr>
+    <tr><td><span class="k">Ctrl</span>+<span class="k">S</span></td><td>导出学生数据备份</td></tr>
+    <tr><td><span class="k">Ctrl</span>+<span class="k">P</span></td><td>打印当前页面</td></tr>
+    <tr><td><span class="k">Ctrl</span>+<span class="k">+</span> / <span class="k">-</span></td><td>放大 / 缩小界面</td></tr>
+  </table>
+
+  <h2>批改作业</h2>
+  <div class="box">
+    <p>三种方式都可以：</p>
+    <ul>
+      <li>点「选择图片」，从电脑里挑作业照片；</li>
+      <li>直接把照片拖进窗口；</li>
+      <li>截图后按 <span class="k">Ctrl</span>+<span class="k">V</span> 粘贴。</li>
+    </ul>
+  </div>
+
+  <h2>导出与打印</h2>
+  <ul>
+    <li>试卷生成后，可开关「导出时附带答案」，再点导出，弹出系统「另存为」对话框。</li>
+    <li>导出的 HTML 用浏览器打开即可打印，答案单独排在卷末页。</li>
+    <li><span class="k">Ctrl</span>+<span class="k">P</span> 可直接调用系统打印。</li>
+  </ul>
+
+  <h2>数据安全</h2>
+  <ul>
+    <li>学生档案、错题、试卷都存在本机，卸载程序会一并删除。</li>
+    <li>建议每周用 <span class="k">Ctrl</span>+<span class="k">S</span> 导出一次备份，存到网盘或 U 盘。</li>
+    <li>换电脑时，在新机器上用「设置 → 导入备份」恢复。</li>
+  </ul>
+
+  <h2>常见问题</h2>
+  <p><b>提示「无法连接接口」</b>　先确认能上网；再核对 Base URL 是否以 <code>/v1</code> 结尾；开了代理或 VPN 的话先关掉试试。</p>
+  <p><b>提示接口返回 401 / 403</b>　密钥错误或没有该模型权限，去服务商控制台确认密钥有效、模型已开通。</p>
+  <p><b>图片批改读不出题目</b>　换支持视觉的模型；照片尽量正对、光线均匀、整页入镜。</p>
+  <p><b>窗口太小或布局挤</b>　按 <span class="k">Ctrl</span>+<span class="k">0</span> 恢复实际大小，或把窗口拉宽到 1100 像素以上。</p>
+</body>
+</html>

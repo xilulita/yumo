@@ -27,8 +27,11 @@ const PROMPTS = {
     const shortRule = p.types.includes('简答题') ? '简答题要给参考答案要点，答案 15–40 字，分点写清楚。' : '';
     const judgeRule = p.types.includes('判断题') ? '判断题的 answer 只写“正确”或“错误”，解析说明判断依据。' : '';
     return `你是一位资深小学语文教研员，正在为${p.grade}学生命制一份阅读理解练习。
-一、选文
+【本卷随机编号 ${p.seed || 'A'}】本次命题的立意角度是：${p.angle || '围绕日常校园生活'}。
+${p.avoid && p.avoid.length ? `以下题材与标题最近已经出过，本次必须换用完全不同的题材、人物、场景与情境，不得复用或改写：\n${p.avoid.map((x, i) => `${i + 1}. ${x}`).join(' / ')}
+` : ''}一、选文
 共 ${p.passages} 篇，每篇字数约 ${p.words} 字，语言符合${p.grade}学生的认知水平，不用生僻字词，不标作者与出处。
+选材要避开常见课文与俗套素材（如“秋天的雨”“桂林山水”之类），优先从${p.angle || '校园与家庭生活'}里找具体的小场景、小物件、小事件，写出独特的细节。
 ${p.passages === 1
   ? `本卷只有 1 篇，文体为「${p.genres[0] || p.genre || '写人记事'}」。`
   : `本卷 ${p.passages} 篇，文体依次为：${p.genres.map((g, i) => `第${i + 1}篇「${g}」`).join('、')}。每篇的文体必须与这里一一对应，不能自行更换或重复。`}
@@ -51,7 +54,9 @@ options 仅在选择题中填写 4 个选项（A. … 形式），其他题型�
   makeBasis(p) {
     const shortTypes = p.types.filter(t => /改写|仿写|造句|扩写|缩写|变换|病句|运用/.test(t));
     return `你是一位资深小学语文教研员，为${p.grade}学生命制一份基础题练习。
-一、题型与配比
+【本卷随机编号 ${p.seed || 'A'}】本次知识点侧重：${p.angle || '字词积累'}。
+${p.avoid && p.avoid.length ? `下面这些词句/题目最近已经用过，本次请全部换新，不要重复：\n${p.avoid.map((x, i) => `${i + 1}. ${x}`).join(' / ')}
+` : ''}一、题型与配比
 考查题型：${p.types.join('、')}。共 ${p.count} 题，题号连续。
 各题型数量尽量平均分配；题量无法整除时，优先保证前几种题型各有至少 1 题。
 题型要与内容匹配：看拼音写词语、填空类用“____”表示空格；句式变换、修改病句、仿写类必须给出完整原句让学生作答，不要做成选择题。
@@ -163,7 +168,7 @@ async function callAI(cfg, messages, opts = {}) {
   const body = {
     model: cfg.model,
     messages,
-    temperature: Math.min(1.5, Math.max(0, Number(cfg.temp) || 0.6)),
+    temperature: Math.min(1.5, Math.max(0, Number(opts.temperature != null ? opts.temperature : cfg.temp) || 0.6)),
     max_tokens: opts.maxTokens || 4096
   };
   const bodyText = JSON.stringify(body);

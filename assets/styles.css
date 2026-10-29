@@ -327,7 +327,7 @@ input,textarea,select{font-family:inherit;color:inherit;}
   box-shadow:inset 2px 2px 4px rgba(120,100,70,.16);background:#F1EADA;
 }
 .pick.on .tick{background:linear-gradient(160deg,#4C8B71,#3E7E66);box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 1px 1px 4px rgba(60,110,90,.35)}
-.pick.on .tick::after{content:"";display:block;width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(3px,-2px);margin:5px auto 0}
+.pick.on .tick::after{content:"";display:block;position:absolute;left:50%;top:50%;width:4px;height:8px;margin:0;border:solid #fff;border-width:0 1.7px 1.7px 0;transform:translate(-0.52px, -2.52px) rotate(42deg);transform-origin:center center}
 .pick .pi{width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--ochre)}
 .stepper-labels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin:0 2px 16px;letter-spacing:.5px}
 

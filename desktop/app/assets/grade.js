@@ -240,13 +240,13 @@ function renderGrade(rec) {
   const practice = rec.practice && rec.practice.items.length ? `
     <div class="card" style="margin-top:4px;padding-top:12px">
       <div class="sec-hd" style="margin-bottom:8px"><h3 style="font-size:14.5px">配套加练 · ${esc(rec.practice.title)}</h3>
-        <button class="more" onclick="exportPractice('${rec.id}')">导出</button></div>
+        <button class="more" data-act="export-practice" data-arg="['${rec.id}']">导出</button></div>
       ${rec.practice.items.map((it, i) => `<div class="qitem" style="padding:10px 0 8px">
         <span class="qtag">${i + 1}</span>
         <div class="qtext" style="font-size:13.5px">${esc(it.stem).replace(/____/g, '<span class="blank"></span>')}</div>
         <div style="font-size:12px;color:var(--ink-3);margin-top:5px">答案：${esc(it.answer)}${it.tip ? '　提示：' + esc(it.tip) : ''}</div>
       </div>`).join('')}
-      <button class="btn ghost btn-sm wide" style="margin-top:8px" onclick="exportPractice('${rec.id}')">导出这份加练（HTML）</button>
+      <button class="btn ghost btn-sm wide" style="margin-top:8px" data-act="export-practice" data-arg="['${rec.id}']">导出这份加练（HTML）</button>
     </div>` : '';
 
   $('#reportBody').innerHTML = `<div class="fadeup">
@@ -271,8 +271,8 @@ function renderGrade(rec) {
     ${errHTML}
     ${practice}
     <div class="btn-row" style="margin-top:12px">
-      <button class="btn ghost" onclick="openStudent('${rec.studentId}')">看学生档案</button>
-      <button class="btn primary" onclick="go('grade')">批改下一份</button>
+      <button class="btn ghost" data-act="open-student" data-arg="['${rec.studentId}']">看学生档案</button>
+      <button class="btn primary" data-act="go" data-arg="['grade']">批改下一份</button>
     </div>
   </div>`;
   go('report');

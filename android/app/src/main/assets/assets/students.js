@@ -17,7 +17,7 @@ function renderStudents() {
       return `<i class="${cls}" style="height:${Math.max(18, Math.min(100, rate))}%"></i>`;
     }).join('');
     const errs = logs.reduce((n, l) => n + (l.errors ? l.errors.length : 0), 0);
-    return `<button class="stu-card" onclick="openStudent('${s.id}')">
+    return `<button class="stu-card" data-act="open-student" data-arg="['${s.id}']">
       <div class="top">${avatarHTML(s)}
         ${errs ? `<span class="tag-tiny">${errs} 处错题</span>` : `<span class="tag-tiny" style="background:var(--jade-soft);color:var(--jade-d)">暂无错题</span>`}
       </div>
@@ -53,7 +53,7 @@ function renderStudentDetail() {
 
   const logHTML = logs.length ? logs.map(l => `
     <button class="card" style="margin-top:10px;padding:13px 14px;width:100%;text-align:left;border:0;font:inherit;color:inherit;cursor:pointer;display:block"
-      onclick="renderGrade(findRec('${l.id}') || JSON.parse(this.dataset.rec))" data-rec='${esc(JSON.stringify(l))}'>
+      data-act="open-report" data-arg="['${l.id}']" data-rec='${esc(JSON.stringify(l))}'>
       <div style="display:flex;align-items:center;gap:9px">
         <div style="flex:1">
           <div style="font-size:13.5px;font-weight:800">${esc(l.title || '作业')}</div>
@@ -72,7 +72,7 @@ function renderStudentDetail() {
         <div style="font-size:17px;font-weight:800">${esc(s.name)}</div>
         <div style="font-size:11.5px;color:var(--ink-3);margin-top:3px">${esc(s.cls || '未分班')}${s.note ? ' · ' + esc(s.note) : ''}</div>
       </div>
-      <button class="btn ghost btn-sm" onclick="editStudent('${s.id}')" style="min-height:34px;padding:7px 12px">编辑</button>
+      <button class="btn ghost btn-sm" data-act="edit-student" data-arg="['${s.id}']" style="min-height:34px;padding:7px 12px">编辑</button>
     </div>
     <div class="stats" style="margin-top:14px">
       <div class="stat" style="box-shadow:var(--shadow-in-sm)"><b>${logs.length}</b><span>批改次数</span></div>
@@ -98,11 +98,11 @@ function renderStudentDetail() {
     </div>`).join('') : '<div class="card" style="text-align:center;color:var(--ink-3);font-size:12.5px">暂无错题，优秀。</div>'}
 
   <div class="btn-row" style="margin-top:14px">
-    <button class="btn ghost" onclick="genPractice('${s.id}')">
+    <button class="btn ghost" data-act="gen-practice" data-arg="['${s.id}']">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       生成专项卷
     </button>
-    <button class="btn primary" onclick="gradeFor('${s.id}')">批改其作业</button>
+    <button class="btn primary" data-act="grade-for" data-arg="['${s.id}']">批改其作业</button>
   </div>
   <div id="stuPracOut" style="margin-top:12px"></div>
 
@@ -158,8 +158,8 @@ ${brief}
       ${d.encourage ? `<div style="margin-top:12px;font-size:13px;color:var(--jade-d);text-align:center;font-family:var(--serif)">—— ${esc(d.encourage)}</div>` : ''}
     </div>
     <div class="btn-row" style="margin-top:12px">
-      <button class="btn ghost" onclick="exportStuPractice('${s.id}','${encodeURIComponent(JSON.stringify(d))}')">导出文件</button>
-      <button class="btn primary" onclick="gradeFor('${s.id}')">批改练习</button>
+      <button class="btn ghost" data-act="export-stu-practice-enc" data-arg="['${s.id}']" data-enc="${encodeURIComponent(JSON.stringify(d))}">导出文件</button>
+      <button class="btn primary" data-act="grade-for" data-arg="['${s.id}']">批改练习</button>
     </div>`;
     ui['prac_' + s.id] = d;
   } catch (err) {
@@ -243,13 +243,15 @@ const PROVIDER_OF = (base) => {
 };
 
 function fillSettings() {
-  $('#provider').value = S.cfg.provider || 'dashscope';
-  $('#baseUrl').value = S.cfg.baseUrl || '';
-  $('#model').value = S.cfg.model || '';
-  $('#apiKey').value = S.cfg.apiKey || '';
-  $('#temp').value = S.cfg.temp;
-  $('#timeout').value = S.cfg.timeout;
-  $('#guardSwitch').classList.toggle('on', S.cfg.guarded !== false);
+  const set = (sel, v) => { const el = $(sel); if (el) el.value = v; };
+  set('#provider', S.cfg.provider || 'dashscope');
+  set('#baseUrl', S.cfg.baseUrl || '');
+  set('#model', S.cfg.model || '');
+  set('#apiKey', S.cfg.apiKey || '');
+  set('#temp', S.cfg.temp);
+  set('#timeout', S.cfg.timeout);
+  const gs = $('#guardSwitch');
+  if (gs) gs.classList.toggle('on', S.cfg.guarded !== false);
   syncApiState();
 }
 
@@ -377,8 +379,10 @@ function boot() {
   syncApiState();
 
   const tickClock = () => {
+    const el = $('#sbClock');
+    if (!el) return;
     const d = new Date();
-    $('#sbClock').textContent = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+    el.textContent = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
   tickClock(); setInterval(tickClock, 30000);
 
@@ -403,7 +407,7 @@ Object.assign(window, {
   go: fn('go'), setMode: fn('setMode'), openStudent: fn('openStudent'),
   openAddStudent: fn('openAddStudent'), editStudent: fn('editStudent'),
   saveStudent: fn('saveStudent'), closeModal: fn('closeModal'),
-  exportPaper: fn('exportPaper'), exportPractice: fn('exportPractice'),
+  exportPaper: fn('exportPaper'), sharePaper: (...a) => YW.sharePaper(...a), shareWeCom: (...a) => YW.shareWeCom(...a), exportPractice: fn('exportPractice'),
   genPractice: fn('genPractice'), exportStuPractice: fn('exportStuPractice'),
   generate: fn('generate'), runGrade: fn('runGrade'), gradeFor: fn('gradeFor'),
   saveConfig: fn('saveConfig'), clearKey: fn('clearKey'), resetDemo: fn('resetDemo'),
